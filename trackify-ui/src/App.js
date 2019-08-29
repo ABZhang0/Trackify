@@ -18,8 +18,9 @@ class App extends Component {
       nowPlaying: {
         name: "Not checked",
         image: ""
-      }
-    }
+      },
+      topArtists: [],
+    };
   }
 
   getHashParams() { // mystery code
@@ -27,10 +28,10 @@ class App extends Component {
     var e, r = /([^&;=]+)=?([^&;]*)/g;
     var q = window.location.hash.substring(1);
 
-    e = r.exec(q)
+    e = r.exec(q);
     while (e) {
       hashParams[e[1]] = decodeURIComponent(e[2]);
-      e = r.exec(q)
+      e = r.exec(q);
     }
 
     return hashParams;
@@ -39,14 +40,20 @@ class App extends Component {
   getNowPlaying() {
     spotifyApi.getMyCurrentPlaybackState()
       .then((response) => {
-        console.log(response)
         this.setState({
           nowPlaying: {
             name: response.item.name,
             image: response.item.album.images[0].url
           }
         })
-      })
+      });
+  }
+
+  getFavoriteArtists() {
+    spotifyApi.getMyTopArtists()
+      .then((response) => {
+        this.setState({ topArtists: response.items });
+      });
   }
 
   render() {
@@ -58,10 +65,16 @@ class App extends Component {
         </a>
         <div className="NowPlaying"> Now Playing: { this.state.nowPlaying.name } </div>
         <div>
-          <img src={ this.state.nowPlaying.image } alt="" style={ { width: 250 } }/>
+          <img src={ this.state.nowPlaying.image } alt="" style={ { width: 150 } }/>
         </div>
         <button onClick={ () => this.getNowPlaying() }>
           Check Now Playing
+        </button>
+        <ul>
+          { this.state.topArtists.map((item, index) => <li key={ index }>{ item.name }</li>) }
+        </ul>
+        <button onClick={ () => this.getFavoriteArtists() }>
+          Get Favorite Artists
         </button>
       </div>
     );
