@@ -20,6 +20,7 @@ class App extends Component {
         image: ""
       },
       topArtists: [],
+      topTracks: [],
     };
   }
 
@@ -40,12 +41,21 @@ class App extends Component {
   getNowPlaying() {
     spotifyApi.getMyCurrentPlaybackState()
       .then((response) => {
-        this.setState({
-          nowPlaying: {
-            name: response.item.name,
-            image: response.item.album.images[0].url
-          }
-        })
+        if (response.item) {
+          this.setState({
+            nowPlaying: {
+              name: response.item.name,
+              image: response.item.album.images[0].url
+            }
+          })
+        } else {
+          this.setState({
+            nowPlaying: {
+              name: "Not playing",
+              image: ""
+            }
+          })
+        }
       });
   }
 
@@ -54,6 +64,13 @@ class App extends Component {
       .then((response) => {
         this.setState({ topArtists: response.items });
       });
+  }
+
+  getFavoriteTracks() {
+    spotifyApi.getMyTopTracks()
+      .then((response) => {
+        this.setState({ topTracks: response.items });
+      })
   }
 
   render() {
@@ -75,6 +92,12 @@ class App extends Component {
         </ul>
         <button onClick={ () => this.getFavoriteArtists() }>
           Get Favorite Artists
+        </button>
+        <ul>
+          { this.state.topTracks.map((item, index) => <li key={ index }>{ item.name }</li>) }
+        </ul>
+        <button onClick={ () => this.getFavoriteTracks() }>
+          Get Favorite Tracks
         </button>
       </div>
     );
